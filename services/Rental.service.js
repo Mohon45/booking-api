@@ -1,15 +1,14 @@
-const User = require("../models/user");
+const Rental = require("../models/Rental");
 const { get_query } = require("../utils/mongooseUtils");
 
-const UserService = {
+const RentalService = {
     create: async (data) => {
-        const user = new User(data);
-        await user.save();
-        return user;
+        const result = await Rental.create(data);
+        return result;
     },
 
     getAll: async (query) => {
-        const { data, meta, page, pageSize } = get_query(User, query);
+        const { data, meta, page, pageSize } = get_query(Rental, query);
 
         const [singlePageData, totalDocs] = await Promise.all([data, meta]);
 
@@ -24,23 +23,23 @@ const UserService = {
         };
     },
 
-    getById: async (userId) => {
-        const user = await User.findOne({ _id: userId });
-        return user;
+    getById: async (rentalId) => {
+        const result = await Rental.findOne({ _id: rentalId });
+        return result;
     },
 
-    update: async (userId, data) => {
-        const result = await User.findOneAndUpdate({ _id: userId }, data, {
+    update: async (rentalId, data) => {
+        const result = await Rental.findOneAndUpdate({ _id: rentalId }, data, {
             returnNewDocument: true,
         });
 
         return result;
     },
 
-    delete: async (userId) => {
-        const result = await User.deleteOne({ _id: userId });
+    delete: async (rentalId) => {
+        const result = await Rental.deleteOne({ _id: rentalId });
         return result;
     },
 };
 
-module.exports = UserService;
+module.exports = RentalService;

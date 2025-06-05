@@ -1,9 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const ObjectId = require("mongodb").ObjectId;
 const { httpResponse } = require("../utils/httpResponse");
-const axios = require("axios");
-const { jwtDecode } = require("jwt-decode");
 
 const User = require("../models/user");
 
@@ -118,45 +115,6 @@ module.exports.login = async (req, res) => {
     }
 };
 
-module.exports.resetPassword = async (req, res) => {
-    const token = req.body.token;
-    const newPassword = req.body.password;
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
-        if (err) {
-            const err = new Error(
-                JSON.stringify(httpResponse("error_auth", {}, "Token expired."))
-            );
-            err.status = 403;
-            res.status(403).json(
-                httpResponse("fail", {}, "User not verified.")
-            );
-            return;
-        }
-        const updatedUser = { password: hashedPassword };
-        try {
-            const userFound = await User.findOneAndUpdate(
-                { _id: ObjectId(user.id) },
-                updatedUser
-            );
-            if (userFound) {
-                res.status(200).json(
-                    httpResponse("success", user, "User password updated.")
-                );
-            } else {
-                res.status(401).json(
-                    httpResponse("fail", {}, "User not password updated..")
-                );
-            }
-        } catch (err) {
-            console.log(err);
-            res.status(500).json(httpResponse("error", {}, err.toString()));
-        }
-    });
-};
-
 module.exports.logout = async (req, res) => {
     try {
         res.clearCookie("token", "", {
@@ -216,29 +174,5 @@ module.exports.getLoggedInUser = async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json(httpResponse("error", {}, err.toString()));
-    }
-};
-
-module.exports.googleUserInfo = async (req, res) => {
-    const accessToken = req.query.access_token;
-    try {
-        const response = await axios.get(
-            "https://www.googleapis.com/oauth2/v1/userinfo",
-            {
-                headers: {
-                    "Access-Control-Allow-Credentials": "true",
-                    "Access-Control-Allow-Origin": "*",
-                    Authorization: `Bearer ${accessToken}`,
-                    Accept: "application/json",
-                },
-                params: { access_token: accessToken },
-            }
-        );
-        res.status(200).json(
-            httpResponse("success", response.data, "User found")
-        );
-    } catch (error) {
-        console.log(error.response);
-        res.status(500).json(httpResponse("error", {}, error.toString()));
     }
 };

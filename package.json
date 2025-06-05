@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "start": "SET PORT=4000 && node ./bin/www",
-        "dev": "npx nodemon npm run SET PORT=4000 && node ./bin/www",
+        "dev": "npx nodemon npm run node ./bin/www",
         "start-docker": "npx nodemon npm run node ./bin/www",
         "debug": "node --inspect ./bin/www"
     },
